@@ -1,0 +1,1021 @@
+---
+title: 
+author: 
+date: 
+output: 
+   pdf_document:
+    number_sections: true
+header-includes: 
+    - \usepackage{amsthm}
+    - \usepackage{xcolor}
+    - \usepackage[ngerman]{babel}
+    - \usepackage[utf8]{inputenc}
+    - \usepackage{amsmath}
+    - \usepackage{amsfonts}
+    - \usepackage{amssymb}
+    - \usepackage[mathscr]{euscript}
+    - \usepackage{graphicx} 
+    - \usepackage{tabularx}
+    - \usepackage{url}
+    - \usepackage{hyperref}
+documentclass: article
+classoption: oneside
+fontsize: 10pt
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(error=TRUE,        # Keep compiling upon error
+                      collapse=TRUE,     # collapse by default
+                      echo=TRUE,         # echo code by default
+                      comment = "##",    # change comment character
+                      fig.width = 6,     # set figure width
+                      out.width = "100%", # set width of displayed images
+                      warning=FALSE,      # show R warnings
+                      message=FALSE)     # show R messages
+```
+
+<!--- Solution Region --->
+<style>
+#solution {
+  background-color: #8FBC8F;
+  border-style: solid;
+  border-color: blue;
+  margin-left: 20px;
+  margin-bottom: 15px;
+  padding: 5px;
+}
+</style>
+
+\newtheoremstyle{normal}
+{10pt} 
+{10pt}
+{\normalfont}
+{}
+{\bfseries}
+{}
+{0.8em}
+{\bfseries{\thmname{#1} \thmnumber{#2}\thmnote{ \hspace{0.5em}(#3)\newline}}}
+\theoremstyle{normal}
+\newtheorem{myDef}{Definition}
+\newtheorem{satz}{Satz}
+
+<!--- Titelseite ---> 
+\input{Titelseite}
+
+<!--- Inhaltsverzeichnis ---> 
+\tableofcontents\newpage
+<!--- Beginn Inhalt --->
+
+<!---
+
+\textbf{}
+\textit{}
+
+--->
+
+
+\section*{Einleitung}
+
+
+
+Diese Ausarbeitung dient der Vorleistung des Fachbereichs Business Mathematics an der Hochschule
+Darmstadt für das Modul \textit{Computational Statistics}, gelesen von Prof. Dr. Jutta Groos. Sie beinhaltet Aufgaben die mit Hilfe der Vorlesungsunterlagen und mit der Softwareprogramm R Markdown bearbeitet wurden. Es werden in dieser Ausarbeitung unterschiedliche Themenbereiche erarbeitet. Diese
+Themen werden in der Vorlesung sehr ausführlich erläutert. Das theoretische beziehungsweise mathematische Hintergrundwissen der Themen sind somit Voraussetzungen für das Verständnis der Aufgaben. Allerdings werden an erforderlichen Stellen ergänzende Bemerkungen bezüglich der Thematik gemacht. Die folgende Arbeit bezieht sich hauptsächlich auf die Vorlesungunterlagen von Prof. Dr. Jutta Groos, Prof. Dr. Horst Zisgen und Dr. Antje Jahn. Falls es andere Quellen verwendet wurden, werden diese an den ensprechenden Stellen gekennzeichnet.
+
+
+\section{Aufgabenblatt 1: Lineare Regression}
+
+Für das erste und zweite Aufgabenblatt wird der in der Vorlesung ausgeteilte \textit{Donald} Datensatz verwendet. Der Datensatz umfasst Messdaten von 150 Beobachtungen mit fünf unabhängige Variablen Geschlecht, Alter, Minderheit, Fremdenfeindlich und IQ. Das Ziel ist eine Vorhersage über die abhängige Variable Trump bzw. die Wahlentscheidung einer Personen zu treffen. Dabei wird die Zustimmung für Trump als Presidenten der Vereinigten Staaten in Prozent angegeben. Da hier die abhängige Variable nicht nur von einer unabhängigen Variablen sondern von mehreren unabhängigen Variablen beschrieben wird, handelt es sich um eine \textbf{multiple lineare Regression}.
+
+
+Zu Beginn müssen erstmal die Daten in R eingelesen werden.
+
+```{r}
+load("Donald.RData")
+```
+
+Der Modellansatz für multiple lineare Regression lautet für $i = 150$ hier:
+
+\[ Y_{i} := \beta_{0} + \beta_{1} X_{i1} + \dots + \beta_{5} X_{i5} + \varepsilon_{i} \]
+
+```{r}
+
+MLR <- lm(Donald_1$Trump ~ Donald_1$Geschlecht + Donald_1$Alter
+          + Donald_1$Minderheit + Donald_1$Fremdenfeindlich + Donald_1$IQ)
+
+summary(MLR)
+```
+
+Die p-Werte sind kleiner als jedes vernünftige Signifikanzniveau (man hätte evtl. $\alpha = 5 \%$ nehmen können). Die Koeffizienten von Geschlecht, Alter, Minderheit, Fremdenfeindlich und IQ sind daher signifikant von 0 verschieden. Dies beruht daher, weil man auf die folgenden Hypothesen getestet hat:
+\begin{eqnarray*}
+H0 &:& \beta_{1} = \beta_{2} = \dots = \beta_{5} = 0 \\
+H1 &:& Mindestens \ ein \ \beta_{l} \neq 0, \ 1 \leq l \leq 5 
+\end{eqnarray*}
+
+Mit Hilfe des Bestimmtheitsmaßes $R^2$ kann gesagt werden wie gut das Modell auf die Daten passt. Das $R^2$ beträgt hier über 97 \%, das heißt man kann also 97 \% der Varianz der Variable Trump durch das oben beschriebene Modell erklären. Zusätzlich kann noch das korrigierte $R^{2^*} = 97,03 \ \% $ betrachtet werden. Dabei besteht das aus $R^2$ und einem Strafterm, welche durch die Hinzunahme der unabhängigen Variablen steigt. 
+
+
+
+\bigskip
+
+Zusätzlich sollten die Parameter, also die Koeffizienten $\beta$, standardisert werden. Da die Konstante, hier Intercept, bei der Analyse der Regressionsgleichung nicht interessant ist, wird sie bei der Standardisierung auf Null gesetzt und die Variablen können nun einfacher miteinander verglichen werden. Es ist erkennbar, dass die Variable Fremdenfeindlichkeit den größten (positiven) Einfluss erreicht hat.
+
+```{r}
+library(lm.beta)
+
+MLR.beta <- lm.beta(MLR)
+
+coef(MLR.beta)
+
+```
+
+
+
+
+Zuletzt werden die Voraussetzungen bzw. Modellannahmen geprüft, da die Schätzer der multiple lineare Regression mit Hilfe der kleinsten Quadrate Methode bestimmt wird und somit bestimmte Optimalitätsbedingugen (siehe Best Linear Unbiased Estimator) erfüllen muss. Wenn die Annahmen nicht stimmen deutet dies darauf hin, dass das gewählte Regressionsmodell den tatsächlichen Zusammenhang nicht vollständig erklärt.
+
+\bigskip
+
+
+Zunächst wird betrachtet ob die Annahme eines linearen Zusammenhangs verletzt ist. Da hier fünf unabhängige Variablen einen Einfluss auf die abhängige Variable haben, kann diese nicht in einem Streudiagramm betrachtet werden. Nichtsdestotrotz kann das partielles Regressionsdiagramm, in dem der Einfluss von einer unabhängigen Variable auf die Zielvariable abgebildet wird, betrachten. Hier ist es deutlich, dass nur bei der Variable Fremdenfeindlich ein klarer Zusammenhang erkennbar ist.
+
+
+
+```{r}
+library(car)
+
+avPlots(MLR)
+```
+
+Jedoch kann auch mit Hilfe der Residuenplot (Fitted values gegen Pearson Residuen) die Linearitätsannahme überprüft werden. Hier wird eine zweidimensionale Grafik mit $\hat{Y}_{i} := \hat{\beta}_{0} + \hat{\beta}_{1} X_{i1} + \dots + \hat{\beta}_{5} X_{i5}$ auf der x-Achse und die Residuen $\varepsilon_{i}= Y_{i} - \hat{Y}_{i}$ auf der y-Achse erstellt. Hier ist keine lineare oder nichtlineare Trend erkennbar und die Punkte sind offensichtlich unsystematisch gestreut. Zudem verteilen sich die Residuen ungefähr in einem gleichbleibend dickem horizontalen Band und somit keine Heteroskedastizität erkennbar. Zudem kann jede Einflussgröße $X_{1}, \dots , X_{5}$ einzeln abgebildet und auf Homoskedastizität überprüft werden.
+
+
+
+```{r}
+
+residualPlots(MLR)
+
+MLR1 <- lm(Donald_1$Trump ~ Donald_1$Geschlecht)
+MLR2 <- lm(Donald_1$Trump ~ Donald_1$Alter)
+MLR3 <- lm(Donald_1$Trump ~ Donald_1$Minderheit)
+MLR4 <- lm(Donald_1$Trump ~ Donald_1$Fremdenfeindlich)
+MLR5 <- lm(Donald_1$Trump ~ Donald_1$IQ)
+
+residualPlots(MLR1, xlab="Geschlecht", ylab="Pearson Residuen")
+residualPlots(MLR2, xlab="Alter", ylab="Pearson Residuen")
+residualPlots(MLR3, xlab="Minderheit", ylab="Pearson Residuen")
+residualPlots(MLR4, xlab="Fremdenfeindlich", ylab="Pearson Residuen")
+residualPlots(MLR5, xlab="IQ", ylab="Pearson Residuen")
+
+```
+
+Nun wird die Normalverteilungsannahme der Residuen geprüft. Dies kann auf sehr unterschiedliche Weisen erfolgen. Hier wird zunächst Histogramm und QQ-Plot erstellt und mit Hilfe dieser Graphiken argummentiert. Es gibt in R unterschiedliche Residuen und einer von denen sind die studentisierte Residuen. Diese werden in intern und extern studentisierte Residuen unterteilt. Die R-Funktionen rstudent() bei der Erstellung der Histogrammvgibt die extern studentisierten Residuen wieder. Näheres zustudentisierte Residuen kann in \cite{HT13} nachgelesen werden. Die Form des Histogramms sollte nun möglichst der standard Normalverteilungskurve entsprechen. 
+
+```{r}
+hist(rstudent(MLR), main="Histogramm stud. Residuen", freq=FALSE)
+# Dichtefunktion der Standardnormalverteilung hinzufügen
+curve(dnorm(x, mean=0, sd=1), col="red", lwd=2, add=TRUE)
+```
+
+Zusätzlich wird nun der Quantil-Quantil (Q-Q) Plot angeschaut. Falls die Daten aus der Normalverteilung stammen sollten die empirischen und die theoretischen Quantile annähernd überein stimmen und somit auch die Datenpunkte auf einer Geraden liegen.
+
+```{r}
+qqnorm(rstudent(MLR), main="Q-Q-Plot stud. Residuen")
+abline(0,1)
+```
+
+Da anhand der Graphiken nicht ganz deutlich gesagt werden kann, ob die Normalverteilungsannahme stimmt oder nicht, wird nun zusätzlich das Shapiro-Wilk Test angewendet.
+
+```{r}
+shapiro.test(rstudent(MLR))
+```
+
+Hier ist die Nullhypothese dass es eine Normalverteilung der Grundgesamtheit vorliegt. Zusätzlich wird ein Signifikanzniveau, üblicherweise $\alpha = 5 \ \%$, gewählt und die Nullhypothese wird abgelehnt wenn der $p$-Wert kleiner ist als das Signifikanzniveau. Somit kann man hier die Normalverteilungshypothese nicht verwerfen.
+
+
+
+
+
+
+
+
+\bigskip
+
+
+Bei der multiplen linearen Regression wird davon ausgegangen, dass die Residuen unabhängig voneinander sind und diese Annahme wird nun mit Durbin-Watson Test auf Richtigkeit geprüft. Auf was dieser Test beruht kann in \cite{JW08} nachgelesen werden. Die Nullhypothese für den Durbin-Watson-Test ist, dass die Residuen nicht korreliert sind. Laut \cite{JW08} existiert bei einem Wert von 2 keine Autokorrelation zwischen den Residuen.
+
+```{r}
+
+dwt(MLR)
+```
+
+
+
+Zum Schluss wird die Multikollinearität geprüft, das heißt es wird geprüft ob die unabhängigen Variablen als lineare Funktion der anderen unabhängigen Variable sich darstellen lassen können. Ein Maß für die Multikollinearität ist der  Varianzinflationsfaktor (kurz VIF) ${VIF}_{j} = \frac{1}{1-R^2_{j}}$. Als Daumenregel sollte der VIF-Wert nicht über 5 oder auch 10 gehen. 
+
+```{r}
+vif(MLR)
+```
+
+Wie man aus der Tabelle erkennen kann, ist eine Multikollinearit ausgeschlossen da alle Variablen nicht linear abhängig von den anderen Variablen sind.
+
+
+
+
+
+
+
+
+\newpage
+
+
+
+
+\section{Aufgabenblatt 2: Cross Validation}
+
+
+
+In dieser Übung wird wieder der Datensatz \textit{Donald} vewendet, wobei hier multiple lineare Regression mit Cross Validation (Kreuzvalidierung) durchgeführt. In dem ersten Aufgabenblatt beruhte das Regressionsmodell auf dem kompletten Datensatz. Bei der Kreuzvalidierung wird jedoch der Datensatz in mehrere Teile aufgeteilt, wobei auf Basis eines Teils des Datensatzes die Modellparameter geschätzt werden und auf den Rest wird dann der Modellfehler berechnet. Während in dem ersten Aufgabenblatt das (korrigierte) Bestimmtheitsmaß $R^2$ für die Anpassungsgüte des Regressionsmodells verwendet wurde, kann nun mit Hilfe der Cross Validation eine Aussage über die Modellgüte bwz. Prognosegüte des Modells getroffen werden. 
+
+Der Datensatz, bestehend aus $n$ Datenpunkte, werden in Trainingsdaten $N_{T}$ und in Testdaten bzw. Validierungsdaten $N_{V}$ mit einem Daumenregel $N_{V} < N_{T}$ aufgeteilt. Auf der Trainingsdatensatz wird die Regressionsanalyse durchgeführt und die Modellparameter geschätzt. Das Regressionsmodell wird daraufhin auf die Testdaten angewendet wobei die Prognose des Modells mit den tatsächlichen Werten vergleicht wird. Dies kann mit Hilfe der mittlere quadratische Fehler, also Mean Squared Error (MSE)
+\[ MSE = \frac{1}{N_{v}} \sum_{i=1}^{N_{V}} (Y_{i} - \hat{Y}_{i})^2 \]
+erreicht werden. Bei der $k$-fold Cross Validation ($k$-fache Kreuzvalidierung) werden zunächst die Daten in $k$ disjunkte Teilmengen bzw. Blöcke partitioniert. Diese werden dann als Testdatensatz bzw. jeder Block wird einmal als Testset verwendet, wobei die verbleibenden $k-1$ Daten für die Trainings des Modells benutzt. Mit $k=n$ tritt das Spezialfall der k-fachen Kreuzvalidierung als die Leave-One-Out-Kreuzvalidierung (LOOCV) auf. Hier wird jede Beobachtung einzeln als Testdatensatz für das Modell verwendet, wobei die übrigen Beobachtungen als Trainingsset deklariert wird.
+
+\bigskip
+
+Die Daten werden zunächst zufällig in zwei Teildatensätze vom Unfang 50 für Testdaten und 100 für Trainingsdaten aufgeteilt. Diese Teilung wird dreimal mit unterschiedlichen seed-Werte durchgeführt. Zudem wird hier wieder einmal die multiple lineare Regressionsmodell angepasst. Der MSE Wert von Testdaten ist für alle drei Durchgänge ungefähr im gleichen (zwischen 35 und 40) Bereich. Hier sollte kein MSE Wert von 0 erwartet werden, da hier nur eine multiple lineare Regression - einer der einfachsten Modelle - für die Prognose verwendet wurde und es bessere Modelle für die Schätzung der Vorhersage existiert. Nichtsdestotrotz gilt auch hier je größer der MSE, desto schlechter wird die Prognose. Zusätzlich ist es erkennbar, dass es bei allen Teilungen die Variable Minderheit einen 
+signifikanzniveau von $1 \ \%$ hat während die anderen Variablen mit $\alpha = 0,1 \ \%$  einen signifikanten Einfluss auf das Modell haben.
+
+
+```{r}
+set.seed(1234)
+indexa<-sample(1:nrow(Donald_1),50)
+testa<-Donald_1[indexa,]
+traina<-Donald_1[-indexa,]
+
+MLRa <- lm(Trump ~ Geschlecht + Alter + Minderheit + Fremdenfeindlich + IQ, data = traina)
+
+summary(MLRa)
+
+predMLRa <- predict(MLRa, testa)
+
+#predMLRa
+
+#mean((testa$Trump-predMLRa)^2)
+#(sum((testa$Trump-predMLRa)^2))/length(testa)
+library(Metrics)
+mse(testa$Trump, predMLRa)
+```
+
+```{r}
+set.seed(4545)
+indexb<-sample(1:nrow(Donald_1),50)
+testb<-Donald_1[indexb,]
+trainb<-Donald_1[-indexb,]
+
+MLRb <- lm(Trump ~ Geschlecht + Alter + Minderheit + Fremdenfeindlich + IQ, data = trainb)
+
+summary(MLRb)
+
+predMLRb <- predict(MLRb, testb)
+
+mse(testb$Trump, predMLRb)
+```
+
+```{r}
+set.seed(2018)
+indexc<-sample(1:nrow(Donald_1),50)
+testc<-Donald_1[indexc,]
+trainc<-Donald_1[-indexc,]
+
+MLRc <- lm(Trump ~ Geschlecht + Alter + Minderheit + Fremdenfeindlich + IQ, data = trainc)
+
+summary(MLRc)
+
+predMLRc <- predict(MLRc, testc)
+
+#predMLRc
+
+mse(testc$Trump, predMLRc)
+```
+
+
+\bigskip
+
+
+
+Es wird hier zunächst eine manuelle Leave-One-Out Cross Validation mit der ersten Zeile als Testset durchgeführt und dazugehörige Test MSE berechnet. MSE Wert ist deutlich höher als die Werte aus der Aufgabe 1.
+
+```{r}
+indexaa<-2:nrow(Donald_1)
+trainaa<-Donald_1[indexaa,]
+testaa<-Donald_1[-indexaa,]
+
+MLRaa <- lm(Trump ~ Geschlecht + Alter + Minderheit + Fremdenfeindlich + IQ, data = trainaa)
+
+predMLRaa <- predict(MLRaa, testaa)
+
+#predMLRaa
+
+#summary(MLRaa)
+
+(testaa[1,6]-predMLRaa)^2   
+```
+
+Nun wird das ganze manuell mit for Schleife automatisiert und für die Zeilen 2 bis 150 durchgeführt.
+
+```{r}
+#leere Vektoren definieren
+quad_abw <- vector(,150)
+pred_for <- vector(,150)
+data<- data.frame(Donald_1)
+
+#for-Schleife definieren
+for(i in 2:150) {
+  daten_i <- data[i,]
+  MLR_for <- lm(Trump ~ Geschlecht + Alter + Minderheit + Fremdenfeindlich + IQ, data = data[-i,])
+  pred_for[i] <- predict(MLR_for, daten_i)
+  quad_abw[i] <- (daten_i[6] - pred_for[i])^2
+}
+sum(quad_abw)/149
+```
+
+Mit dem delta Befehl wird ein Vektor mit MSE Werten der Cross Validation, wobei die erste Komponente die rohe und zweite die angepasste Vorhersagefehler der Kreuzvalidierungsschätzung, ausgegeben. Weiteres dazu kann in \cite{BOOT} auf der Seite 42 nachgelesen werden.
+
+
+```{r}
+model <- glm(Trump ~ Geschlecht + Alter + Minderheit + Fremdenfeindlich + IQ, 
+        family = "gaussian", data = Donald_1)
+
+library(boot)
+cv <- cv.glm(Donald_1, model, K=150)
+
+cv$delta
+```
+
+Es ist erkennbar, dass beide MSE Werte, für for Schleife und cv.glm Befehl, sehr nahe beieinander und auch wieder zwischen 35 und 40 liegen.
+
+
+\bigskip
+
+Zuletzt wird 10 k-fache Cross Validations mit $k=5$ und $k=10$ durchgeführt. Es ist wieder deutlich, dass die MSE Werte zwischen 35 und 40 liegen.
+
+```{r}
+
+cv1 <- cv.glm(Donald_1, model, K=5)
+cv2 <- cv.glm(Donald_1, model, K=5)
+cv3 <- cv.glm(Donald_1, model, K=5)
+cv4 <- cv.glm(Donald_1, model, K=5)
+cv5 <- cv.glm(Donald_1, model, K=5)
+cv6 <- cv.glm(Donald_1, model, K=5)
+cv7 <- cv.glm(Donald_1, model, K=5)
+cv8 <- cv.glm(Donald_1, model, K=5)
+cv9 <- cv.glm(Donald_1, model, K=5)
+cv10 <- cv.glm(Donald_1, model, K=5)
+
+cv11 <- cv.glm(Donald_1, model, K=10)
+cv12 <- cv.glm(Donald_1, model, K=10)
+cv13 <- cv.glm(Donald_1, model, K=10)
+cv14 <- cv.glm(Donald_1, model, K=10)
+cv15 <- cv.glm(Donald_1, model, K=10)
+cv16 <- cv.glm(Donald_1, model, K=10)
+cv17 <- cv.glm(Donald_1, model, K=10)
+cv18 <- cv.glm(Donald_1, model, K=10)
+cv19 <- cv.glm(Donald_1, model, K=10)
+cv20 <- cv.glm(Donald_1, model, K=10)
+
+
+cv1$delta
+cv2$delta
+cv3$delta
+cv4$delta
+cv5$delta
+cv6$delta
+cv7$delta
+cv8$delta
+cv9$delta
+cv10$delta
+
+cv11$delta
+cv12$delta
+cv13$delta
+cv14$delta
+cv15$delta
+cv16$delta
+cv17$delta
+cv18$delta
+cv19$delta
+cv20$delta
+```
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+
+
+\section{Aufgabenblatt 3: Bootstrap}
+
+Das Bootstrap Verfahren ist eine Resampling Methode mit der man unter anderem die Verteilung von Parameterschätzern einer linearen Regression überprüfen kann. Es wird also verwendet, wenn man bei Verletzung der Voraussetzungen (zum Beispiel bei der linearen Regression) oder bei komplexeren Schätzern Aussagen über deren Verteilung machen möchte. Bei der Bootstrap-Algorithmus werden aus einer Stichprobe der Länge $n$ $R$ Replikationen, der wiederum die Länge $n$ hat, erzeugt. Das heißt hier wird immer wieder neue Stichprobe durch Ziehen mit Zurucklegen (der Länge $n$) erzeugt. Aus dieser neu erzeugten Stichprobe wird dann der Schätzwert $\hat{\theta}$ berechnet und dieser Vorgang wird R mal wiederholt.
+
+In dieser Aufgabe wird die Aussage des Zentralen Grenzwertsatzes für Bootstrap-Daten überprüft. Zunächst werden 50 bzw. 1000 Datensätze mit jeweils 500 gleichverteilten Daten auf [0,1] simuliert und davon die Mittelwerte gespeichert.
+
+```{r}
+set.seed(2018)
+
+datensatz1 <- matrix(runif(500*50,0,1), nrow=50)
+meanssim50 <- apply(datensatz1,1,mean)
+
+datensatz2 <- matrix(runif(500*1000,0,1), nrow=1000)
+meanssim1000 <- apply(datensatz2,1,mean)
+```
+
+Es wird nun ein weiterer Datensatz mit 500 gleichverteilten Daten auf [0,1] simuliert, wobei hier noch mit Bootstrap 50 bzw. 1000 Replikationen erzeugt und die Mittelwerte der Replikationen gespeichert werden.
+
+```{r}
+#library(boot)
+x<- data.frame(runif(500,min=0,max=1))
+#x[,1] 
+
+helpfunction<- function(data,index){
+  d <- data[index,]
+  return(mean(d))
+}
+
+meansboot50<- boot(x, statistic = helpfunction, R = 50)
+
+meansboot1000<- boot( x, statistic = helpfunction, R = 1000)
+```
+
+Nun werden die Mittelwerte der simulierten Datensätze mit Mittelwerte der Bootstrap Replikationen mit Hilfe der Histogramme und Boxplots miteinander verglichen. Mit den untenstehenden Histogrammen ist es deutlich, dass die Verteilung der Mittelwerte der simulierten Daten und Bootstrap Daten, zum mindestens für $R=1000$, sehr ähnlich sind. Zusätlich wird mit dem Shapiro-Wilk Test auf die Normalverteilung getestet. Hier ist es zu erkennen, dass die Mittelwerte aus dem simulierten Daten und auch aus dem replizierten Datensatz normalverteilt sind.
+
+
+```{r}
+hist(meanssim50, breaks = "FD", main = "Mittelwerte Simulation 50")
+boxplot(meanssim50, main="Boxplot der Mittelwerte Simulation 50")
+shapiro.test(meanssim50)
+```
+
+
+```{r}
+hist(meansboot50$t, breaks = "FD", main = "Mittelwerte Bootstrap 50")
+boxplot(meansboot50$t, main="Boxplot der Mittelwerte Bootstrap 50")
+shapiro.test(meansboot50$t)
+```
+
+```{r}
+hist(meanssim1000, breaks = "FD", main = "Mittelwerte Simulation 1000")
+boxplot(meanssim1000, main="Boxplot der Mittelwerte Simulation 1000")
+shapiro.test(meanssim1000)
+```
+
+```{r}
+hist(meansboot1000$t, breaks = "FD", main = "Mittelwerte Bootstrap 1000")
+boxplot(meansboot1000$t, main="Boxplot der Mittelwerte Bootstrap 1000")
+shapiro.test(meansboot1000$t)
+```
+
+Mit dem Zweistichproben-t-Test wird Mittelwerte zweier Stichproben, hier simulierten und mit Bootstrap berechnteten Mittelwerte, auf die Gleichheit (Nullhypothese) oder Ungleichheit (Alternativhypothese) der Erwartungswerte geprüft. Da hier bei beiden Datensätze (50 bzw. 1000) die p-Werte deutlich kleiner als Signifikanzniveau $\alpha = 5 \ \%$ sind, kann gesagt werden, dass die Mittelwerte signikant unterschiedlich sind. 
+
+```{r}
+t.test(meanssim50,meansboot50$t)
+t.test(meanssim1000,meansboot1000$t)
+```
+
+
+
+
+\newpage
+
+
+\section{Aufgabenblatt 4: Shrinkage Methoden}
+
+In diesem Teil der Ausarbeitung werden die Shrinkage Methoden, Ridge und Lasso Regressionen, für die Prognose der Zielgröße angewendet. Bei zu vielen Einflussvariablen kann es vorkommen, dass man den Einfluss der geschätzten Modellparameter (Koeffizienten) künstlich mit Hilfe eines Straftermes schrumpfen (Ridge) bzw. die Anzahl dieser Variablen reduzieren und somit einen Variablenselektion durchführen (Lasso). Es wird der Datensatz \textit{prostate} aus dem Paket \textit{ElemStatLearn} verwendet. Es wird der Einfluss von acht Variablen (lcavol, lweight, age, lbph, svi, lcp, gleason und pgg45) von Prostata-Krebs-Patienten auf deren PSA-Wert (die abhängige Variable lpsa) untersucht. 
+
+Zunächst werden die Daten eingelesen und eine lineare Regression durchgeführt.
+
+```{r}
+library(ElemStatLearn)
+library(glmnet)
+data("prostate", package = "ElemStatLearn")
+
+trainsh <- prostate[prostate$train,]
+testsh <- prostate[!prostate$train,]
+
+X <- data.matrix(prostate[,1:8]) #anstatt model.matrix hier data.matrix genommen oder as.matrix()
+Y <- prostate$lpsa
+
+X.train <- data.matrix(trainsh[,1:8]) 
+Y.train <- trainsh$lpsa
+
+X.test <- data.matrix(testsh[,1:8]) 
+Y.test <- testsh$lpsa
+```
+
+
+Zudem werden die Koeffizienten der linearen Regressionsmodell in einem Vektor gespeichert um später diese mit Ridge und Lasso Regressionskoeffizienten zu vergleichen.
+
+```{r}
+lineareReg <- lm(lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, 
+                 data=trainsh)
+
+summary(lineareReg)
+
+koeff = coef(lineareReg)
+koeff
+```
+
+
+Bei der Ridge Regression mit $\lambda=0$ erhält man wieder die lineare Regression.
+
+```{r}
+# alpha = 0 gibt RR und alpha=1 gibt Lasso zurück
+ridge0 <- glmnet(X,Y, alpha=0, lambda=0)
+ridge0
+coef(ridge0)
+```
+
+Vergleicht man nun die lineare Regression bzw. Ridge Regression mit $\lambda=0$ mit Ridge Regression mit $\lambda=10$, so ist es deutlich erkennbar, dass die Einfüsse bzw. die Koeffizienten der Variablen schrumpfen. 
+
+```{r}
+ridge10 <- glmnet(X,Y, alpha=0, lambda=10)
+ridge10
+coef(ridge10)
+```
+
+Möchte man das nun in die Höhe treiben, so kann auch ein Wert von $\lambda = 100$ betrachtet werden.
+
+```{r}
+ridge100 <- glmnet(X,Y, alpha=0, lambda=100)
+ridge100
+coef(ridge100)
+```
+
+
+Die farbigen Kurven zeigen wie die Koeffizientenschätzungen für verschiedene unabhängige Variablen  sich durch verschiedene ??-Werten entwickeln. Zudem misst die horizontale Achse den durch das angepasste Modell erklärten Abweichungsanteil. 
+
+```{r}
+plot(glmnet(X,Y, alpha=0, nlambda=2), xvar='dev', label=TRUE)
+plot(glmnet(X,Y, alpha=0, nlambda=7), xvar='dev', label=TRUE)
+plot(glmnet(X,Y, alpha=0, nlambda=10), xvar='dev', label=TRUE)
+plot(glmnet(X,Y, alpha=0, nlambda=1000), xvar='dev', label=TRUE)
+```
+
+
+Nun wird das beste $\lambda$ über Kreuzvalidierung gewählt und ein Plot für den Test-MSE-Schätzer in Anhängigkeit von $\lambda$ erzeugt.
+
+
+```{r}
+set.seed(1234)
+ridge.cv <- cv.glmnet(X, Y, alpha=0, lambda = 5^seq(10,-10, length =100))
+plot(ridge.cv)
+```
+
+```{r}
+ridge.cv$lambda.min 
+```
+
+Der optimale Schätzer ist hier $\lambda = 0.1208261$ und die dazugehörigen Koeffizienten für die Ridge Regression sehen wie folgt aus: 
+
+```{r}
+coef(ridge.cv, s = "lambda.min") 
+```
+
+Nun vergleicht man diese Koeffizienten mit den Koeffizienten aus der linearen Regressionsmodell. Es fällt auf, dass alle Variablen kleiner sind als vorher. 
+
+```{r}
+koeff
+```
+
+
+Am Ende kann nun ein Test MSE berechnet werden.
+
+```{r}
+ridge.fit <- glmnet(X,Y, alpha=0, lambda=ridge.cv$lambda.min )
+ridge.pred <- predict(ridge.fit, X.test)
+
+mse(ridge.pred, Y.test) 
+```
+
+
+
+
+
+
+
+\bigskip
+
+
+Jetzt werden die Koeffizienten der Variablen nicht nur geschrumpft sondern es findet direkt eine Variablenselektion statt, wobei die Einflüsse der Variablen 0 werden und somit auch nicht mehr in das Modell aufgenommen werden. Das ganze geschieht mit Lasso Methode.
+
+
+```{r}
+lasso0 <- glmnet(X,Y, alpha=1, lambda=0)
+lasso0
+coef(lasso0)
+```
+
+
+```{r}
+lasso10 <- glmnet(X,Y, alpha=1, lambda=10)
+lasso10
+coef(lasso10)
+```
+
+
+
+```{r}
+plot(glmnet(X,Y, alpha=1, nlambda=2), xvar='dev', label=TRUE)
+plot(glmnet(X,Y, alpha=1, nlambda=7), xvar='dev', label=TRUE)
+plot(glmnet(X,Y, alpha=1, nlambda=10), xvar='dev', label=TRUE)
+```
+
+
+
+```{r}
+set.seed(1234)
+lasso.cv <- cv.glmnet(X, Y, alpha=1, lambda = 5^seq(10,-10, length =100))
+plot(lasso.cv)
+```
+
+```{r}
+lasso.cv$lambda.min 
+```
+
+```{r}
+coef(lasso.cv, s = "lambda.min") 
+```
+
+```{r}
+koeff
+```
+
+Das Lasso Verfahren mit der minimalen $\lambda = 0.03291064$ eliminiert die Variable lcp und verringert zusätzlich die Einflüsse der restlichen Variablen.
+
+
+
+```{r}
+lasso.fit <- glmnet(X,Y, alpha=1, lambda=lasso.cv$lambda.min )
+lasso.pred <- predict(lasso.fit, X.test)
+
+mse(lasso.pred, Y.test) 
+```
+
+
+\newpage
+
+
+
+\section{Aufgabenblatt 5: PCA- und PLS-Regression}
+
+```{r}
+library(ElemStatLearn)
+library(glmnet)
+data("prostate", package = "ElemStatLearn")
+
+trainsh <- prostate[prostate$train,]
+testsh <- prostate[!prostate$train,]
+
+X <- data.matrix(prostate[,1:8]) #anstatt model.matrix hier data.matrix genommen oder as.matrix()
+Y <- prostate$lpsa
+
+X.train <- data.matrix(trainsh[,1:8]) 
+Y.train <- trainsh$lpsa
+
+X.test <- data.matrix(testsh[,1:8]) 
+Y.test <- testsh$lpsa
+```
+
+In diesem Aufgabenblatt werden wieder die \textit{prostate} Daten verwendet und die PCA- und PLS Regressionen durchgeführt. 
+
+Zunächst wird die Korrelationsmatrix für unabhängigen Variablen erstellt. Es ist hier zu erkennen, dass eine hohe Korreltaion bei den Variablen lcp und lcavol mit 0.6753, lcp und svi mit 0.6731, lcp und pgg45 mit 0.6315 und zuletzt gleason und pgg45 mit 0.7519 existiert. Da es anscheinend hier hohe Multikollinearität vorliegt, können dementsprechend PCA- und PLS-Regressionen als Modellansätze verwendet werden. Somit ist es auch nicht verwunderlich, dass die Variable lcp bei der Lasso Regression eliminiert wurde.
+
+```{r}
+pro <- prostate[, c(-9, -10)]
+round(cor(pro),4)
+```
+
+Nun folgt die PCA-Regression, wobei die Variablen vor der PCA-Regression standardisiert werden und zusätzlich wird der Fehler einer 10-fachen Cross-Validation (hier in pls Paket als default) für jede Anzahl von Hauptkomponenten verwendet.
+
+```{r}
+library(pls)
+library(Metrics)
+pcr <- pcr(lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45,
+             data=prostate, scale=TRUE, validation="CV")
+summary(pcr)
+```
+
+Anhand der Ergebnisse und des Plots liegt zwar das Minimum der RMSEP bzw. MSEP Werte bei 8 Hauptkomponenten aber dennoch kann man zum Beispiel einer Komponentenanzahl von 4 ein sehr gutes Modell entwickeln. Dies ist möglich, da schon bei 4 Hauptkomonenten ein RMSEP Wert von $0.7666$ erreicht werden konnte und zudem ein großer Teil, hier $82.71 \ \%$, der abhängigen Variablen erklärt werden kann.
+
+
+```{r}
+validationplot(pcr,val.type="MSEP")
+```
+
+Zusätzlich wird der Test MSE-Wert für die PCA-Regression berechnet.
+
+```{r}
+pcr_model <- pcr(lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, 
+                 data = trainsh, scale=TRUE, validation = "CV") 
+
+pcr_pred <- predict(pcr_model, testsh, ncomp = 4)
+library(Metrics)
+mse(pcr_pred, Y.test) 
+```
+
+
+\bigskip
+
+
+Nun wird eine PLS-Regression durchgeführt.
+
+```{r}
+pls <- plsr(lpsa ~ lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45,
+             data=prostate, scale=TRUE, validation="CV")
+summary(pls)
+```
+
+Hier ist es ganz eindeutig das Minimum der RMSEP Werte mit einer Anzahl von 3 PLS-Komponenten erreicht werden kann. Dies kann auch im untenstehenden Plot betrachtet werden.
+
+
+```{r}
+validationplot(pls,val.type="MSEP")
+```
+
+Natürlich wird auch hier ein MSE Wert für die Vorhersagegenauigkeit des Modells berechnet.
+
+```{r}
+pls_model <- plsr(lpsa~lcavol + lweight + age + lbph + svi + lcp + gleason + pgg45, 
+                  data = trainsh, scale=TRUE, validation = "CV") 
+
+pls_pred <- predict(pls_model, testsh, ncomp = 3)
+library(Metrics)
+mse(pls_pred, Y.test)
+```
+
+Zuletzt können die Test MSE Werte von Ridge-, Lasso-, PCA-, und PLS-Regression verglichen werden. Anscheinend ergabe bei der Lasso-Regression der beste MSE Wert - welche durch das Weglassen der mit anderen Variablen korrelierte Variable lcp begründet ist.
+
+
+```{r}
+mse(ridge.pred, Y.test) 
+mse(lasso.pred, Y.test) 
+mse(pcr_pred, Y.test)
+mse(pls_pred, Y.test)
+```
+
+
+
+
+\newpage
+
+
+\section{Aufgabenblatt 6: Erzeugung von Zufallszahlen}
+
+
+Es werden nun Zufallszahlen mit Hilfe der Pseudozufallszahlengeneratoren erzeugt. Die Zufallszahlen heißen auch Pseudozufallszahlen, da diese Zahlen durch einen deterministischen Algorithmus berechnet wird und zufällig aussieht. Es gibt mehrere Pseudozufallszahlengeneratoren und hier werden nur die beiden lineare Kongruenz Generator und Mersenne Twister Generator angewendet. Beim ersten Aufruf des Generators muss vorher immer ein Startwert (englisch seed) gewählt werden. Der lineare Kongruenz Generator
+\[ x_{i+1} = a \cdot x_{i} + b \ \ \ \ (mod \ m) \]
+ist ein rekursiver arithmetischer Zufallszahlengenerator, da die neuen Zufallszahlen aus den vorhergehenden Zahlen berechnet werden. Es muss ein Anfansgswert (oder seed) $x_{0}$, Modulo $m$ und die Parameter $a$ und $b$ gewählt werden. Zunächst wird der vorgegebene LKG $x_{i+1} = 13 \cdot x_{i} \ \ mod \ 137$ implementiert. Die neu erzeugten Pseudozufallszahlen werden zusätzlich unten ausgegeben.
+
+```{r}
+#hier d als Startwert x0
+lcg.rand <- function(n,d=1) {
+  rng <- vector(length = n)
+  m <- 137
+  a <- 13
+  c <- 0
+  
+  for (i in 1:n) {
+    d <- (a * d + c) %% m
+    rng[i] <- d 
+  }
+  return(rng)
+}
+
+lcg.rand(n=136)
+```
+
+Die Zufallszahlen $x_{i}$ werden nun als Paare von aufeinanderfolgenden Zufallszahlen $(x_{1},x_{2}), (x_{2},x_{3}), \dots , (x_{135},x_{136})$ als Punkte in einer zweidimensionalen Ebende dargestellt.
+
+```{r}
+x.lkg <- lcg.rand(n=136)
+plot(x.lkg[-1],x.lkg[-length(x.lkg)])
+```
+
+Ein besserer Zufallsgenerator ist der Mersenne Twister Generator und ist auch daher der Standard-Generator für viele Softwareprogramme (auch hier in R). Näheres zu Mersenne Twister Generator kann in \cite{SG16} nachgelesen werden. Es wird hier nun Zufallszahlen $y_{i}$ mit Hilfe der Mersenne Twister Generator erstellt und wie bei der LKG als Paare von aufeinanderfolgenden Zufallszahlen $(y_{1},y_{2}), (y_{2},y_{3}), \dots , (y_{135},y_{136})$ geplotet. 
+
+```{r}
+set.seed(kind="Mersenne-Twister",seed=1) #hier d=1 Startwert 
+vec <- 1:136
+x.mt <- sample(vec, 136)
+plot(x.mt[-1],x.mt[-length(x.mt)])
+```
+
+Es ist hier eindeutig sichtbar, dass bei der LKG Muster und bei der Mersenne Twister Generator keine Muster erkennbar ist. Daher kann auch der Mersenne Twister Generator als der bessere Pseudozufallszahlengenerator erklärt werden.
+
+
+\bigskip
+
+
+Nun sollen zuerst die beiden folgenden LKG  
+
+\begin{eqnarray*}
+x_{i+1}^{(1)} &=& 40014 \cdot x_{i}  \ mod \ 2147483563 \\
+x_{i+1}^{(2)} &=& 40692 \cdot x_{i}  \ mod \ 2147483399
+\end{eqnarray*}
+
+berechnet und dann sollen die Ergebnisse wie folgt
+
+\[ z_{i} = \left(x_{i}^{(1)} + x_{i}^{(2)} \right)  \ mod \ 2147483563 \]
+
+kombiniert werden. Diese sollen dann im Anschluss noch mit dem Mersenne Twister Generator verglichen werden.
+
+```{r}
+# lcgneu.rand(n=136, a=13, m=137, d= 1)ergibt gleiche Ergbenis
+
+#alle Variablen frei gesetzt-damit man später ändern kann
+
+#hier d als Startwert x0
+lcgneu.rand <- function(n,a,m,d) {
+  rng <- vector(length = n)
+  for (i in 1:n) {
+    d <- (a * d ) %% m
+    rng[i] <- d 
+  }
+  return(rng)
+}
+
+x1 <- lcgneu.rand(n=2147, a=40014, m=2147483563, d=1)
+x2 <- lcgneu.rand(n=2147, a=40692, m=2147483399, d=1)
+
+hilfe <- function(x1,x2){
+  (x1+x2)%%2147483563
+}
+```
+
+Diese neue Zufallszahl $z_{i}$ wird, wie oben schon einmal durchgeführt, geplotet.
+
+```{r}
+z<- hilfe(x1,x2)
+plot(z[-1],z[-length(z)])
+```
+
+Es ist hier erkennbar, dass die Zufallszahlen gegen 0 konvergieren, wobei dies bei dem Mersenne Twister Generator nicht der Fall ist. Somit ist dies wieder ein Grund das auch beim optimierten bzw. verbesserten LKG Modellen der Mersenne Twister Generator die deutlich bessere Auswahl ist.
+
+
+
+\newpage
+
+\section{Aufgabenblatt 7: Erzeugung von Gammaverteilten Zufallszahlen}
+
+Es wird hier (nicht gleichverteilte) 1000 Zufallszahlen mit Hilfe der Verwerfungsmethode für die Dichte der Gammaverteilung $Gamma\left(\frac{3}{2}, 1\right)$
+\[ f(x) = \frac{1}{\Gamma \left(\frac{3}{2}\right)} \cdot x^{\frac{1}{2}} \cdot e^{-x} = \frac{2}{\pi}  \cdot x^{\frac{1}{2}} \cdot e^{-x}, \ \ \ x>0 \]
+mit 
+\[ h(x) = \frac{2}{3}  \cdot e^{\frac{-2x}{3}} \ \ \text{und} \ \ \ c = \frac{3^{\frac{3}{2}}}{\left( 2 \pi e \right)^{\frac{1}{2}}}  \]
+erzeugt. 
+
+Für die Anwendung der Verwerfungsmethode wird zunächst $h(x)$ integriert
+
+\begin{eqnarray*}
+ H(x) &=& \int_0^x h(x) dx = \int_0^x  \frac{2}{3}  \cdot e^{\frac{-2x}{3}} dx = \frac{2}{3} \cdot \int_0^x  e^{\frac{-2x}{3}} dx \\
+  &=&  \frac{2}{3} \cdot \int e^{z} \cdot \left( - \frac{3}{2} \right) dz =  \frac{2}{3} \cdot  \left( - \frac{3}{2} \right)\cdot \int e^{z} dz \\
+  &=& - \int e^{z} dz =  - e^{z} \vert = - e^{\frac{-2x}{3}} \vert_{0}^x = 1 - e^{\frac{-2x}{3}}
+\end{eqnarray*}
+
+und anschließend die Umkehrfunktion gebildet $H^{-1} (y)$.
+
+```{r}
+f <- function(x){ 
+  o <- (2/pi)*x^(1/2)*exp(-x)
+  return(o)     
+}
+
+h <- function(x){ 
+  z <- (2/3)*exp(-2*x/3)      
+  return(z)     
+}
+
+c <- (3^(3/2))/(2*pi*exp(1))^(1/2)
+
+h_inf<- function(x){
+  l <- (-3/2)*log(1-x, base = exp(1))
+  return(l)
+}
+```
+
+Jetzt kann die Verwerfungsmethode implementiert werden. Es wird zunächst Zufallszahlen $Y$ aus $h$ und $U$ gleichverteilte Zufallszahlen erzeugt. Falls die Bedingung $U \leq \frac{f(y)}{c \cdot h(y)}$ gilt, werden diese erzeugte Zufallszahl akzeptiert. Dieser Vorgang wird dann so oft wiederholt bist 1000 Zufallszahlen erzeugt wurden. 
+
+```{r}
+x <- NULL
+while(length(x) < 1000){
+  loop = TRUE
+  while(loop){
+    s <- runif(1,0,1)
+    y <- h_inf(s)
+    u<- runif(1,0,1)
+    abfrage <- u<= f(y)/(c*h(y))
+    if(abfrage){
+      x <- c(x,y) # in das leere Vektor werden jetzt die y drangehängt, 
+                  # die die Abfrage erfüllt haben
+      loop = FALSE
+    }
+  }
+}
+```
+
+Zusätzlich wird die Erzeugung der gammaverteilte Zufallszahlen mit der Verwerfungsmethode anhand der QQ Plot betrachtet. Hier ist es zu sehen, dass die Punkte für die höheren Quantile deutlich von der Referenzlinie abweichen.
+
+```{r}
+rr<- rgamma (n=1000, shape=1, scale=3/2)
+qqplot(rr,x, xlab = 'Theoretische Quantile von Gammaverteilung', ylab = 'Beobachtete Quantile', 
+       main = 'Gamma QQ Plot')
+abline(0,1)
+```
+
+
+
+
+
+
+
+
+\newpage
+
+\section{Aufgabenblatt 8: Monte Carlo}
+
+ALs letztes wird die Monte Carlo Integration mit Samples Mean Verfahren der Standardnormalverteilung 
+
+\[ P \left( -1,96 \leq X \leq 1,96 \right) = \int_{-1,96}^{1,96} \frac{1}{\sqrt{2 \pi}} \cdot e^{-0,5 x^2} dx \]
+
+implementiert. Gesucht ist  hier 
+
+\[ I =  \int_{a}^{b} g(x) dx = \int_{a}^{b} \frac{g(x)}{f(x)} f(x) dx   \]
+
+mit $g(x) = \frac{1}{\sqrt{2 \pi}} \cdot e^{-0,5 x^2}$ und der Wahrscheinlichkeitsdichte
+
+\begin{equation}
+   f(x) =
+   \begin{cases}
+     \text{>} 0 & \text{für alle } x \in [a,b] \ \text{mit} \ g(x) \neq 0 \\
+     = 0  & \text{für alle } x \in [a,b] \ \text{mit} \ g(x) = 0 \ \text{und für alle }  x \in \mathbb{R}\setminus[a,b] 
+   \end{cases}
+\end{equation}
+
+Dann gilt für jede nach $f(x)$ verteilte Zufallsgröße, dass der Integral als Erwartungswert einer Zufallsgröße bestimmt werden kann:
+
+\[ \mathbb{E} \left( \frac{g(x)}{f(x)} \right) \]
+
+
+Sei $x$ nun auf $[a,b]$ gleichverteilt, das heißt 
+
+\begin{equation}
+   f(x) =
+   \begin{cases}
+     \frac{1}{b-a} & \text{für alle } x \in [a,b] \\
+      0  & \text{sonst }
+   \end{cases}
+\end{equation}
+
+somit gilt dann für $\mathbb{E} \left( \frac{g(x)}{f(x)} \right) = \mathbb{E} \left( (b-a) \cdot g(x) \right)= (b-a) \cdot \mathbb{E} (g(x)) = I$. Zum Schluss wird $I$ mit Hilfe des arithmetischen Mittels einer Stichprobe geschätzt:
+
+\[ \hat{I} = \frac{b-a}{N} \cdot \sum_{i=1}^N g(x_{i}) \]
+
+
+```{r}
+t <-runif(1000,0,1)
+
+g <- function(x){ 
+  z <- (1/sqrt(2*pi))*exp(-0.5*x^2)      
+  return(z)     
+}
+
+a = -1.96
+b = 1.96
+
+((b-a)/1000)*sum(g(t))
+```
+
+ 
+
+
+
+
+
+<!--- Literaturverzeichnis --->
+\newpage
+\addcontentsline{toc}{section}{Literatur}
+\bibliographystyle{chicago}
+\begin{thebibliography}{12345}
+  \bibitem[BOOT]{BOOT} Angelo Canty, Brian Ripley: https://cran.r-project.org/web/packages/boot/boot.pdf, aufgerufen am 21.06.2018
+	\bibitem[HT13]{HT13} Helge Toutenburg: Lineare Modelle, Springer-Verlag, 2013 
+	\bibitem[JW08]{JW08} Jeffrey M. Wooldridge: Introductory Econometrics: A Modern Approach, Cengage Learning, 2008
+	\bibitem[SG16]{SG16} Stefan Gerlach: Computerphysik - Einführung, Beispiele und Anwendungen, Springer-Verlag, 2016
+%		\bibitem[HP06]{HP06} Helmut Pruscha: Statistisches Methodenbuch - Verfahren, Fallstudien, Programmcodes, Springer-Verlag, 2006 ---------dies ist ein kommentar
+	\end{thebibliography}
+

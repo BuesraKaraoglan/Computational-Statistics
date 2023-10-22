@@ -1,0 +1,300 @@
+---
+title:  "Lineare Modellwahl III"
+subtitle: <h1><u>Partial Least Squares Regression</u></h1>
+author:
+- Büsra Karaoglan (754331)
+
+
+output:
+  pdf_document: 
+    toc: true
+    toc_depth: 2
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+\section{Einleitung}
+
+Partial Least Squares oder PLS ist ein Sammelbegriff für rechnergestützte statistische Verfahren, die einen Kompromiss zwischen "Strukturenentdeckend" (zum Beispiel Clusteranalyse) und "Datenreduzierend" (zum Beispiel Faktorenanalyse) bilden. 
+
+Bei der Faktorenanalyse (Hauptkomponentenanalyse (engl. für Principal Component Analysis, PCA)) erfolgt eine Reduzierung der Dimension des durch die \emph{unabhängigen Variablen $X$} aufgespannten Raumes in eine kleinere Anzahl latenter Variablen, die jedoch einen Großteil der in den Ausgangsdaten enthaltenen Varianz erklären sollten. Ziel der Faktoranalyse ist also, die Zahl der unabhängigen Variablen $X$ zu verkleinern, ohne dass die Daten wesentlich an "Aussagekraft" verlieren. Diese "Optimierung" findet aber \textbf{ausschließlich im Raum der unabhängigen Variablen,} $\mathbf{X}$ statt. 
+
+Möchte man nun anschließend eine Regression dieses optimierten Raumes unabhängiger Variablen auf einen Satz \emph{abhängiger Variablen $Y$} durchführen, so steht man vor dem Problem, dass unter Umständen einige der ursprünglichen unabhängigen Variablen $X$ einen besseren Zusammenhang mit den abhängigen Variablen $Y$ ergeben hätten als die neu erzeugten, anzahlmäßig weniger latenten Variablen. Man läuft also Gefahr, Zusammenhangsinformation zwischen $X$ und $Y$ zu verlieren, da man ungeachtet $Y$ bereits im Raum $X$ vollendete Tatsachen geschaffen hat. 
+
+Partial Least Squares Verfahren tragen diesem Sachverhalt dadurch Rechnung, dass in beiden Räumen $X$ und $Y$ "gleichzeitig optimiert" wird. Die Zerlegung der Variablenräume $Y$ und $X$ erfolgt unter der Nebenbedingung maximaler Kovarianzen zwischen den (neu erzeugten, latenten) unabhängigen Variablen $X$ und den abhängigen Variablen $Y$. 
+Die Datenreduktion, oder besser gesagt, die Reduktion der Dimensionalität findet in beiden Räumen, $X$ und $Y$, gleichzeitig statt.
+Die Faktoren werden also unter Zuhilfenahme der Varianz-Kovarianzmatrix zwischen $X$ und $Y$ bestimmt. 
+
+
+Der wesentliche Unterschied zwischen der PLS-Regression und der PCR ( Hauptkomponentenregression (engl. für Principal Component Regression)) liegt also darin, dass die PLS bei der Findung der PLS-Komponenten für die X-Daten bereits die Struktur der Y-Daten benutzt. Damit wird häufig erreicht, dass weniger PLS-Komponenten nötig werden und diese außerdem leichter zu interpretieren sind.
+
+
+\newpage
+
+Es gibt zwei Ansätze der PLS-Regression. Der erste einfachere Ansatz ist der PCR ähnlich und bestimmt den Zusammenhang zwischen einer einzigen Zielgröße \emph{y} (zum Beispiel die Oktanzahl) und vielen Messgrößen \emph{X} (zum Beispiel Spektren). Dieser PLS-Ansatz wird PLS1 genannt. Es ist aber auch möglich, ein gemeinsames Modell für viele Zielgrößen \emph{Y} (zum Beispiel Zusatzstoff 1, Zusatzstoff 2, usw.) und viele Messgrößen \emph{X} zu errechnen. Man nennt diese PLS-Methode PLS2. Eigentlich ist die PLS1-Methode im PLS2-Ansatz als Sonderfall enthalten. 
+In Abbildung soll die Idee und die beteiligten Matrizen für den allgemeinen Fall der PLS2 vorgestellt werden.
+
+
+
+\section{Allgemeines Vorgehen}
+
+
+Ausgangspunkt ist die Datenmatrix $\mathbf{X}$ der Dimension ($N \times M$), mit $N$ Objekten und $M$ gemessenen Eigenschaften zum Beispiel den $M$ Spektrenwerten. Zu jedem Objekt $i$ wird eine Zielgröße $y_{i}$ gemessen ($i=1,\dots , \ N$), die den Vektor $\mathbf{y}$ bildet. Werden zu jedem Objekt mehrere $y_{ij}$-Werte gemessen, so ergeben die verschiedenen $y_{j}$-Vektoren die Matrix $\mathbf{Y}$ mit der Dimension ($N \times K$), wobei $K$ die Anzahl der $y_{j}$-Zielgrößen ist ($j = 1, \dots , \ K$). Die Idee der PLS ist es, sowohl mit den $X$-Daten eine PCA zu machen als auch mit den $Y$-Daten, wobei aber beide voneinander wissen. In Abbildung ist dieser Informationsaustausch zwischen der $X$- und der $Y$-Seite als Pfeil angedeutet, wobei die PCA der $X$-Daten Information aus den $Y$-Daten erhält und die PCA der $Y$-Daten von den $X$-Daten beeinflusst wird. 
+
+
+
+![Schematische Darstellung der PLS und der beteiligten Matrizen](./pic/PLS.jpg)
+
+Auf die mathematische Herleitung der PLS wird hier nicht näher eingegangen und kann im Anhang nachgelesen werden. Hier folgt nun eine kurze Erklärung der in Abbildung \ref{fig:00} dargestellten Matrizen. Die Methode der PLS kombiniert Funktionen der Hauptkomponentenanalyse und der multiplen Regression. Hierfür wird eine Regression von vielen unabhängigen $x$-Variablen auf eine oder mehrere $y$-Variablen berechnet. Der Unterschied zur Multilinearen Regression ist der, dass die $x$-Variablen hoch korreliert und interkorreliert sein dürfen, dass es viel mehr $x$-Variable als Objekte geben darf und trotzdem die Regression gerechnet werden kann.
+\newline
+Auch bei der PLS Regression werden die $\mathbf{X}$-Daten in die Matrizen $\mathbf{T}$ und $\mathbf{P}$ zerlegt, wie bei der PCA. Allerdings wird bei der Zerlegung in die PLS-Komponenten für die $\mathbf{X}$-Daten die Zielgröße $y$ schon mit einbezogen. Als Zwischenschritt ist hier bei der PLS die $\mathbf{W}$-Matrix nötig. In der $\mathbf{W}$-Matrix steckt die Verbindung zu den $Y$-Daten.
+\newline
+Man hat auf der einen Seite die Datenmatrix $\mathbf{X}$, die mit Hilfe der PCA in die beiden Matrizen
+$\mathbf{P}$ (Faktormatrix bzw. Loadingsmatrix) und $\mathbf{T}$ (Scoremetrix) plus einer Fehlermatrix $\mathbf{E}$ zerlegt wird: $\mathbf{X = T P^T + E}$
+\newline
+Auf der anderen Seite hat man die Zielgrößenmatrix $\mathbf{Y}$, die auch nur aus einem einzigen Vektor bestehen kann. Hat diese $\mathbf{Y}$-Matrix mehr als 1 Vektor, so macht man auch hier eine PCA und erhält die Faktormatrix $\mathbf{Q}$ mit der zugehörigen Scorematrix $\mathbf{U}$ und den Fehlerterm $\mathbf{F}$: $\mathbf{Y = U Q^T + F}$  
+
+\newpage
+
+Diese zwei Gleichungen nennt man die "äußeren Beziehungen". Das Ziel von PLS ist es, die Norm von $\mathbf{F}$ zu minimieren und gleichzeitig eine Korrelation zwischen $\mathbf{X}$ und $\mathbf{Y}$ zu erhalten, in dem die Matrizen $\mathbf{U}$ und $\mathbf{T}$ in Beziehung zueinander gesetzt werden: $\mathbf{U = B T}$. Diese Gleichung nennt man auch die "innere Beziehung". 
+
+
+
+
+\section{Predictive Ability}
+
+
+Wie bei der Hauptkomponenten-Regression wird auch bei PLS-Regression vorzugsweise beim Vorliegen vieler Regressoren eingesetzt, etwa um dem Multikollinearitätsproblem zu begegnen. 
+\newline
+Natürlich stellt sich dann die Frage, wie viele Komponente
+bestimmt und für die Regressionsbeziehung berücksichtigen werden sollte. Eine praktikable Vorgehensweise basiert auf der \emph{Kreuzvalidierung}. Dazu werden wiederholt Beobachtungen aus dem Datensatz entfernt; mit den restlichen wird die PLS-Regression durchgeführt. Für jede Anzahl von Komponenten wird jeweils der Wert eines Zielkriteriums bestimmt. Die Anzahl wird dann gewählt, bei der das zusammengefasste Kriterium minimal ist. 
+\newline
+Bei vielen Verfahren der multivariaten Statistik lässt sich die Zahl der Freiheitsgrade nicht angeben, wodurch die Berechnung des Standardfehlers unmöglich wird. Um dennoch ein Maß für die Größe des Vorhersagefehlers zu bekommen, greift man auf das quadratische Mittel des Fehlers, RMSEP, zurück. \textbf{RMSEP} steht für \textbf{R}oot \textbf{M}ean \textbf{S}quared \textbf{E}rror of \textbf{P}rediction und \textbf{PRESS} steht für \textbf{PR}edictive \textbf{E}rror \textbf{S}um of \textbf{S}quares. 
+\newline
+Für das PRESS-Kriterium gilt bei \emph{K} Durchgängen, wobei im \emph{k}-ten Durchgang \emph{m} Beobachtungen mit den Indizes \emph{$i_{1,k}, \dots , i_{m,k}$} ausgeschlossen sind, ist
+
+\[ PRESS = \sum_{k=1}^{K} \sum_{l=1}^{m} \left(y_{i_{l,k}} -  \hat{y}_{i_{l,k}} \right)^2 \]
+
+RMSEP wird durch Summation aller quadrierten Vorhersagefehler während einer Kreuzvalidierung berechnet und ist ein Maß für die Güte eines Modells. Ein niedriger RMSEP-Wert deutet auf ein gutes Vorhersagemodell. RMSEP misst also die Vorhersagefähigkeit (englisch predictive ability) eines Modells.
+
+\[ RMSEP = \sqrt{\frac{PRESS}{n}} \]
+
+PRESS bzw. RMSEP können dazu verwendet werden, die optimale Zahl an Variablen durch einen schrittweisen Variablenselektionsvorgang zu finden. Das "beste" Modell besteht aus möglichst wenigen unabhängigen Variablen und zeigt dabei den niedrigsten (oder nahezu niedrigsten) PRESS-Wert.
+
+
+
+\newpage
+
+\section{Anwendung}
+
+\subsection{Kalibrierung von NIR-Spektren}
+
+Die Partial Least Square Regression hat in den letzten Jahren sehr stark an Bedeutung gewonnen und ist zum fast ausschließlich verwendeten Regressionsalgorithmus für die multivariate Regression in der Chemie geworden. Vor allem in der Spektroskopie wird die PLS zur Kalibrierung von Eigenschaften aus Spektren verwendet. Multivariat beschreibt dabei den Umstand, das zu einer gesuchten Konzentration nicht nur \emph{ein} Messwert, sondern eine \emph{Vielzahl} von Messwerten (im Fall eines Spektrums die Intensitäten $I_{l}$ bei den Wellenzahl $v_{l}$) vorliegt. Da nicht jeder Messwert die gleiche Information trägt - manche Spektralbereiche tragen nur wenig oder keine Information über die gesuchte Substanz, andere sind korreliert und liefern redundante Werte-, dienen diese Verfahren vor allen Dingen zur Reduktion der großen Menge an Daten auf die für die Konzentrationsbestimmung notwendigen.
+
+
+Um die Fähigkeit der PLS-Regression zu demonstrieren, soll ein spektroskopisches Beispiel gewählt werden, denn hier ist die Kollinearität zwischen den einzelnen Spektrenwerten besonders hoch und man misst wie oben erwähnt in der Regel viel mehr X-Variablen (Wellenlängen) als man Kalibrierproben zur Verfügung hat. Eine Kalibrierung mit der Multiple Lineare Regression (kurz MLR) wäre also nur möglich, wenn man sich auf einige wenige einzelne Wellenlängen einschränkt, was prinzipiell möglich wäre, aber natürlich gleich die Frage aufwirft, welche Wellenlängen man wählt. Die Lösung bietet die PLS. Es können das gesamte Spektrum verwenden werden und man erfährt anhand der Regressionskoeffizienten sozusagen als Zugabe, welche Wellenlängen für die Kalibrierung wichtig sind.
+
+
+Es folgt also ein Beispiel aus der Spektroskopie und eine kurze Zusammenfassung der \emph{gasoline} Daten. Es handelt sich um NIR-Spektren im Wellenlängenbereich 900 bis 1700 nm und Oktanzahl von 60 Benzinproben. Die NIR-Spektren wurden in 2-nm-Intervallen gemessen, was 401 Wellenlängen ergab. Später will man nur die Spektren messen und aus den Spektren den Oktanzahl bestimmen. 
+\newline
+\textbf{NIR}: Als nahes Infrarot (NIR) wird der Bereich des elektromagnetischen Spektrums bezeichnet, der sich in Richtung größerer Wellenlänge an das sichtbare Licht anschließt.
+\newline
+\textbf{Okatanzahl}: Die Oktanzahl ist ein Maß für die Klopffestigkeit von Benzinen. Je höher die Oktanzahl, desto höher ist auch die Leistungsfähigkeit des Benzins und damit des Motors. 
+\newline
+Die Messung der Spektren ist relativ einfach und kostengünstig im Gegensatz zu der traditionelle Labormethoden für die Bestimmung der Oktanzahl. Es wird also angestrebt, einen funktionalen Zusammenhang mit dem der Oktanzahl aus der gemessenen Spektren berechnet werden kann. 
+\newline
+Als Datenbasis für die PLS-Regression sind zum einen die \emph{X}-Werte (hier \emph{NIR}) und zum anderen die Y-Werte, die in der Regel aufwendig zu bestimmende Referenzwerte (hier \emph{octane}).
+\newline
+\emph{NIR}: Das NIR-Spektrum ist eine Matrix mit 401 Spalten. \emph{octane}: Die Oktanzahl ist ein numerischer Vektor. 
+
+```{r results='hide', message=FALSE, warning=FALSE, comment=FALSE}
+library(pls)
+data(gasoline)
+
+gasTrain<- gasoline[1:50,] 
+gasTest<- gasoline[51:60,]
+```
+
+Die $X$-Variablen sind zum Teil stark korreliert, wie aus der Korrelationsmatrix zu erkennen ist.
+
+```{r}
+#View(gasoline)
+df<-cbind(gasoline$octane, as.matrix(gasoline$NIR))
+View(df)
+corm<-cor(df)
+View(corm)
+```
+
+Die mit $R$ durchgeführte PLS-Regression führt nun zu dem nachstehenden Ergebnis, wenn erst einmal keine Beschränkung bei den Faktoren formuliert wird.
+
+```{r}
+gas1<- plsr(octane ~ NIR, ncomp = 10, data = gasTrain, validation = "CV")
+summary(gas1)
+```
+
+Die vorhergesagten Oktanzahlen werden mit zwei PLS-Komponenten bereits zu 96,85% erklärt, weitere PLS-Komponenten verbessern diesen Wert nur unbedeutend. Hier würde man also bei Zugrundelegung des Anteils der erklärten Varianz wohl zwei PLS-Komponenten verwenden, um die abhängige Variable ($octane$) zu erklären.
+
+Zudem ist in diesem Beispiel der RMSEP=0,2996, wenn zwei PLS-Komponenten verwendet werden und die Kreuzvalidierung angewandt wird. Damit ist die optimale Anzahl an PLS-Komponenten gefunden. Um die  RMSEPs viel einfacher zu beurteilen werden diese zusätzlich grafisch dargestellt.
+
+```{r}
+plot(RMSEP(gas1), legendpos = "topright")
+```
+
+Eine wichtige Möglichkeit die Kalibrationsgüte oder Vorhersagegüte zu
+überprüfen, ist die grafische Darstellung der vorhergesagten Werte im Vergleich
+zu den gemessenen Werten. Dazu werden die aus der Kalibriergleichung berechneten
+$\hat{y}$-Werte gegen die Referenzwerte y aufgetragen. Der Referenzwert wird
+üblicherweise auf der x-Achse aufgetragen, während der aus der Regressionsgleichung berechnete Y-Wert „Predicted Y“ genannt wird und auf der y-Achse aufgetragen wird. 
+
+Anhand des Diagramms kann man Besonderheiten in den Kalibrierdaten erkennen.
+Werte mit großem Abstand von der Geraden werden schlecht durch die Kalibriergleichung beschrieben. Man erkennt, ob die Vorhersagegenauigkeit
+für kleine und große Y-Werte gleich gut ist und auch Abweichungen von der Linearität lassen sich an dieser Grafik bereits erkennen.
+
+Das untere Bild zeigt nun die mit dem Regressionsmodell vorhergesagten Werte im Vergleich zu den gemessenen Werten berechnet mit zwei PLS-Komponenten.
+
+```{r}
+plot(gas1, ncomp = 2, asp = 1, line = TRUE)
+```
+
+Der Scoreplot liefert Information über die Objekte bezogen auf die
+Hauptkomponenten.
+
+```{r}
+plot(gas1, plottype = "scores", comps = 1:3)
+```
+
+Die erste Hauptkomponente erklärt 78,2% der Varianz in den spektralen Daten, die zweite Hauptkomponente trägt mit weiteren 7,4% bei. Da hier nur PLS1 Modell verwendet wurde, erfolgte demnach auch nur in X-Daten ein PCR. Daher beziehen sich hier die Erklärungsanteile auf X-Daten und konnten schon oben in der Ausgabe für $summary(gas1)$ in der $X$-Zeile abgelesen werden. 
+
+Zusätzlich können diese Erklärungsanteile mit folgendem Befehl angezeigt werden.
+
+```{r}
+explvar(gas1)
+```
+
+Der Loadingsplot zeigt die Zusammenhänge der einzelnen Variablen zu den
+Hauptkomponenten. Er wird entweder als zweidimensionaler Plot der Loadings von Comp 1 gegen die von Comp 2 dargestellt oder im Fall von spektralen Daten als Linienplot.
+
+```{r}
+plot(gas1, "loadings", comps = 1:2, legendpos = "topleft", labels = "numbers", xlab = "nm") 
+abline(h = 0)
+```
+
+
+```{r}
+predict(gas1, ncomp = 2, newdata = gasTest)
+
+RMSEP(gas1, newdata = gasTest)
+
+sqrt(sum((predict(gas1, ncomp = 2, newdata = gasTest)-gasTest[,1])^2)/nrow(gasTest))
+```
+
+Es folgt nun abschließend ein Vergleich der Validierungsergebnisse des PCR- und PLS-Modells zur Vorhersage der Oktanzahl aus NIR-Spektren. Hierfür werden die Regressionskoeffizienten der PLS und PCR betrachtet. Die folgende Abbildung zeigt die Regressionskoeffizienten für alle Wellenlängen unter Berücksichtung von zwei PLS-Komponenten und drei bzw. vier PCR-Komponenten. 
+
+```{r}
+gas.pcr <- pcr(octane ~ NIR, ncomp = 10, data = gasoline, validation = "CV")
+gas.pls <- plsr(octane ~ NIR, ncomp = 10, data = gasoline, validation = "CV")
+
+
+plot(gas.pcr, "coefficients", comps = 3:4, legendpos = "bottomleft", 
+     labels = "numbers", xlab = "nm")
+
+plot(gas.pls, "coefficients", comps = 2, add = TRUE, col = "blue", 
+     legendpos = "topleft", labels = "numbers", xlab = "nm")
+```
+
+Die Regressionskoeffizienten werden als Linienplot dargestellt, um
+den Zusammenhang mit den Wellenlängen zu verdeutlichen. Der erste Regressionskoeffizient b1 gehört zu 900 nm (erste gemessene Wellenlänge
+im Spektrum). Der zweite dann zu 902 nm usw., da alle 2 nm ein Messwert
+aufgenommen wurde. Der letzte Regressionskoeffizient gehört damit zu der letzten gemessenen Wellenlänge im Spektrum (bei 1700 nm). Die Regressionskoeffizienten für zwei PLS- und vier PCR-Komponenten unterscheiden sich nur sehr wenig und vorwiegend auf den Wellenlängen, die sowieso nicht viel beitragen, also betragsmäßig kleine Werte haben (zum Beispiel zwischen 900 und 1100 nm). In zwei PLS-Komponenten ist also die gleiche Information enthalten wie in vier PCR-Komponenten. 
+
+\newpage
+
+Nun gibt es zwischen 1150 und 1400 und zusätzlich zwischen 1600 und 1700 Wellenzahlen Bereiche der Regressionskoeffizienten, in dem starke Ausschläge mit wenig kleineren überlagerten Ausschlägen vorkommen. Wir wissen, dass betragsmäßig große Regressionskoeffizienten einen großen Beitrag zur Zielgröße leisten, also ist dieser Bereich für die Vorhersage der Oktanzahl besonders wichtig.
+Um die Vorhersage robuster zu machen, kann man zudem den Wellenzahlbereich beschränken und erneut eine PLS-Regression rechnen.
+
+
+
+
+
+\subsection{Hitters-Daten}
+
+
+Die Methode der Partial Least Square kann wie schon erläutert für Variablen verwendet werden, die stark korrelieren. Da die PLS-Methode als Kombination der Hauptkomponentenanalyse (PCA) und der Multiplen Regression betrachtet wird, können die für die PCA verwendeten Daten auch mit der PLS-Methode bearbeitet werden.
+
+
+
+
+```{r, results='hide', message=FALSE, warning=FALSE, comment=FALSE}
+library(ISLR)
+data(Hitters, package = "ISLR")
+Hitters <- na.omit(Hitters)
+
+x <- model.matrix(Salary~.,Hitters)[,-1]
+y <- Hitters$Salary
+    
+set.seed(1)
+train <- sample(1:nrow(x), nrow(x)/2)
+test <- (-train)
+y.test <- y[test]
+set.seed(1)
+```
+
+Zunächst wird die Korrelationsmatrix ausgegeben.
+
+```{r}
+# Multi-collinearity
+  
+    Hitters_num<-Hitters[, c(-14,-15,-19, -20)]
+    cor_table<-round(cor(Hitters_num, use="complete.obs", method="pearson")*100,1)
+    cor_table
+```
+
+Mit Hilfe von $R$ werden nun Haupkomponenten- und PLS-Regression durchgeführt.
+
+```{r}
+pcr.fit <- pcr(Salary~., data=Hitters , subset=train, scale=TRUE, validation="CV")
+summary(pcr.fit)
+
+pls.fit <- plsr(Salary~., data=Hitters, subset=train, scale=TRUE, validation="CV")
+summary(pls.fit)
+```
+
+
+Man kann anstelle des RMSE-Kriteriums das MSE-Kriterium betrachten.
+      
+```{r}
+validationplot(pcr.fit, val.type = "MSEP", legendpos="topright")
+
+validationplot(pls.fit, val.type = "MSEP", legendpos="topright")
+```   
+
+Hier werden zwei PLS-Komponenten berücksichtigt. Ein Vergleich mit den Ergebnissen der Hauptkomponentenregression (hier sieben PCA-Komponenten) lässt erkennen, dass tatsächlich mit viel weniger PLS-Komponenten ein genau so großer Teil der Varianz der abhängigen Variablen erklärt wird, wie es bei Hauptkomponentenregression der Fall ist.
+      
+```{r}
+pcr.pred <- predict(pcr.fit,x[test,],ncomp=7)
+mean((pcr.pred-y.test)^2) 
+
+pls.pred <- predict(pls.fit, x[test,], ncomp=2)
+mean((pls.pred-y.test)^2) 
+```
+
+
+
+```{r}
+pcr.fit <- pcr(Salary~., data=Hitters, scale=TRUE, ncomp=7)
+summary(pcr.fit)
+
+pls.fit <- plsr(Salary~., data=Hitters, scale=TRUE, ncomp=2)
+summary(pls.fit)
+```
+
+
+Zuletzt sollte man noch beachten, dass die PLS-Regression mit zwei PLS-Komponenten 46,40% und der PCA-Regression 46,69% der Varianz von $Salary$ erklärt. Dies geschieht nur, weil die PCA in $X$-Daten und PLS in $X$- und $Y$-Daten optimiert. Desweiteren hat die PCA-Regression ein MSE-Wert von 96556 und die PLS-Regression von 101417. 
+
+
+
