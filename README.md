@@ -4,6 +4,8 @@
 **Prüferin:** Prof. Dr. Jutta GROOS
 **Abgabedatum:** 27. Juli 2018
 
+## Inhalt der Ausarbeitung
+
 Diese Ausarbeitung dient der Vorleistung des Fachbereichs Business Mathematics an der Hochschule Darmstadt für das Modul Computational Statistics, gelesen von Prof. Dr. Jutta Groos. Sie beinhaltet Aufgaben, die mithilfe der Vorlesungsunterlagen und mit der Softwareprogramm R Markdown bearbeitet wurden. In dieser Ausarbeitung werden verschiedene Themenbereiche behandelt, die im Rahmen der Vorlesung ausführlich erläutert wurden. Das theoretische beziehungsweise mathematische Hintergrundwissen der Themen sind somit Voraussetzungen für das Verständnis der Aufgaben.
 
 ## Aufgabenübersicht
