@@ -1,4 +1,4 @@
-# Ausarbeitung für das Modul Computational Statistics
+# Computational Statistics
 
 Diese Ausarbeitung dient der Vorleistung des Fachbereichs Business Mathematics an der Hochschule Darmstadt für das Modul Computational Statistics, gelesen von Prof. Dr. Jutta Groos. Sie beinhaltet Aufgaben, die mithilfe der Vorlesungsunterlagen und mit der Softwareprogramm R Markdown bearbeitet wurden. In dieser Ausarbeitung werden verschiedene Themenbereiche behandelt, die im Rahmen der Vorlesung ausführlich erläutert wurden. Das theoretische beziehungsweise mathematische Hintergrundwissen der Themen sind somit Voraussetzungen für das Verständnis der Aufgaben.
 
@@ -12,5 +12,6 @@ Diese Ausarbeitung dient der Vorleistung des Fachbereichs Business Mathematics a
 - **Aufgabe 6:** Erzeugung von Zufallszahlen
 - **Aufgabe 7:** Erzeugung von Gammaverteilten Zufallszahlen
 - **Aufgabe 8:** Monte Carlo
+
 
 © 2018 Büsra KARAOGLAN | Hochschule Darmstadt
