@@ -1,5 +1,3 @@
 * linguist-vendored
+*.rmarkdown linguist-vendored=false
 *.rmd linguist-vendored=false
-*.r linguist-vendored=false
-*.rd linguist-vendored=false
-*.rscript linguist-vendored=false
