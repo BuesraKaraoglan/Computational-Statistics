@@ -1,3 +1,2 @@
 * linguist-vendored
-*.rmarkdown linguist-vendored=false
 *.rmd linguist-vendored=false
